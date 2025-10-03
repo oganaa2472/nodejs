@@ -1,0 +1,30 @@
+{
+    "id": "p001",
+    "name": "Wireless Headphones",
+    "description": "High-quality over-ear wireless headphones with noise cancellation.",
+    "price": 129.99,
+    "currency": "USD",
+    "category": "Electronics",
+    "brand": "SoundMax",
+    "stock": 57,
+    "rating": 4.5,
+    "reviews": [
+      {
+        "user": "John Doe",
+        "comment": "Great sound quality!",
+        "rating": 5
+      },
+      {
+        "user": "Anna Smith",
+        "comment": "Comfortable but a bit pricey.",
+        "rating": 4
+      }
+    ],
+    "images": [
+      "https://example.com/products/p001/front.jpg",
+      "https://example.com/products/p001/side.jpg"
+    ],
+    "createdAt": "2025-09-29T18:00:00Z",
+    "updatedAt": "2025-09-29T18:00:00Z"
+  }
+  
