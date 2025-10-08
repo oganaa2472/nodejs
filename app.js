@@ -1,47 +1,31 @@
-const fs = require('fs');
-const express = require('express');
 
+const express = require('express');
+const morgan = require('morgan');
 const app = express();
 
+// routes
+const tourRouter = require('./routes/tourRoutes.js');
+const userRouter = require('./routes/userRoutes.js');
 // middleware that can modify incoming request data
 app.use(express.json());
+app.use(express.static(`${__dirname}/public`));
+// custom middleware
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));// third party middleware
+}
 
 
+app.use((req, res, next) => {
 
-const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/simple.json`));
-
-app.get('/api/v1/tours/',(req, res) => {
-    res.status(200).json({data: {
-        tours:tours
-    },
-    results : tours.length,
-    status: 'success'});
-});
-
-app.get('/api/v1/tours/:id',(req, res) => {
-    const tour = tours.find(el => el.id === parseInt(req.params.id));
-    res.status(200).json({data: {
-        tour: tour
-    },
-    
-    status: 'success'});
-});
-app.post('/api/v1/tours',(req, res) => {
-    const newId = tours[tours.length - 1].id + 1;
-    const newTour = Object.assign({id: newId}, req.body);
-    tours.push(newTour);
-    fs.writeFile(`${__dirname}/dev-data/data/simple.json`, JSON.stringify(tours), err => {
-        res.status(201).json({
-            status: 'success',
-            data: {
-                tour: newTour
-            }
-        });
-    });
+    console.log('Hello from the middleware 👋')
+    next();
 })
 
-const PORT = process.env.PORT || 3000;   
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
+
+
+module.exports = app;
+
+
