@@ -1,21 +1,65 @@
-const { getAllTours, createTour, getTour, updateTour, deleteTour,checkID,checkBody } = require('../controllers/tourController.js');
 const express = require('express');
-const tourRouter = express.Router();
+//const tourController = require('./../controllers/tourController');
+const {
+  getAllTours,
+  createTour,
+  getTour,
+  updateTour,
+  deleteTour,
+  aliasTopTours,
+  getTourStats,
+  getMonthlyPlan,
+  discoverTours,
+  getDistances,
+  uploadTourImages,
+  resizeTourImages,
+} = require('../controllers/tourController');
 
-// routes
+const { protect, restrictTo } = require('../controllers/authController');
 
-tourRouter.param('id', checkID);
+const reviewRouter = require('./reviewRoutes');
 
-// create checkBody middleware
+const router = express.Router();
 
+// aliasing top tours via middleware
+router.route('/top-5-cheap').get(aliasTopTours, getAllTours);
 
-tourRouter.route('/')
-    .get(getAllTours)
-    .post(checkBody,createTour);
+// aggregation of tour stats
+router.route('/tour-stats').get(getTourStats);
 
-tourRouter.route('/:id')
-    .get(getTour)
-    .patch(updateTour)
-    .delete(deleteTour);
+router
+  .route('/monthly-plan/:year')
+  .get(protect, restrictTo('admin', 'lead-guide', 'guide'), getMonthlyPlan);
 
-module.exports = tourRouter;
+// pass router params to checkID controller middleware function
+//router.param('id', checkID);
+
+// router.route('/').get(getAllTours).post(checkBody, createTour);
+
+router
+  .route('/discoverTours/:range/origin/:coordinate/unit/:unit')
+  .get(discoverTours);
+
+router.route('/distances/:coordinate/unit/:unit').get(getDistances);
+
+router
+  .route('/')
+  .get(getAllTours)
+  .post(protect, restrictTo('admin', 'lead-guide'), createTour);
+
+router
+  .route('/:id')
+  .get(getTour)
+  .patch(
+    protect,
+    restrictTo('admin', 'lead-guide'),
+    uploadTourImages,
+    resizeTourImages,
+    updateTour
+  )
+  .delete(protect, restrictTo('admin', 'lead-guide'), deleteTour);
+
+// mount review router to creating tour's reviews route
+router.use('/:id/reviews', reviewRouter);
+
+module.exports = router;
